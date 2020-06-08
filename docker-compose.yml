@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  basement-gatekeeper:
+    build: .
+
+    ports:
+      - "4021:4021"
+    environment:
+      - NODE_ENV=production
+      - PROJECT_MODE=production
+    labels:
+      - traefik.enable= true
+      - traefik.http.routers.bm-gatekeeper.rule=Host(`togetherbox.shamot.ir`)
+      - traefik.http.services.bm-gatekeeper.loadbalancer.server.port=4021
+    # networks:
+    #   - default
+      # - traefik-public
+
+

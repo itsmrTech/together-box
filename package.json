@@ -1,0 +1,38 @@
+{
+  "name": "togetherbox",
+  "description": "a box for being together",
+  "version": "0.0.1",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node ./build/main.js",
+    "docker": "backpack build && node ./build/main.js --docker",
+    "dev": "backpack dev",
+    "build": "backpack build",
+    "postinstall": "backpack build",
+    "production": "backpack build && node ./build/main.js --production"
+  },
+  "dependencies": {
+    "backpack-core": "^0.4.2",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.17.2",
+    "cors": "^2.8.5",
+    "didyoumean": "^1.2.1",
+    "dotenv": "^4.0.0",
+    "express": "^4.15.4",
+    "homework-logger": "^0.0.3",
+    "jsonwebtoken": "^8.1.0",
+    "lodash": "^4.17.4",
+    "moment": "^2.24.0",
+    "mongoose": "^5.6.3",
+    "mongoose-timestamp": "^0.6.0",
+    "nodeify": "^1.0.1",
+    "path": "^0.12.7",
+    "request-promise-native": "^1.0.7",
+    "validator": "^9.2.0",
+    "ws": "^7.3.0"
+  },
+  "devDependencies": {
+    "morgan": "^1.8.2"
+  }
+}
