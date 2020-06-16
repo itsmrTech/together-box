@@ -8,7 +8,7 @@ import Hash from './sensitive/Hash';
 
 var userSchema = mongoose.Schema({
 
-	username: {
+	email: {
 		type: String,
 		required: true
 	},
@@ -17,7 +17,7 @@ var userSchema = mongoose.Schema({
 userSchema.plugin(mongooseTimestamp);
 //UPDATING HASH WHEN PASSWORD IS CHANGED
 userSchema.virtual('password').set(async function(password){
-	return await Hash.update({user:this._id},{user:this._id,hash:password},{upsert:true});
+	return await Hash.updateOne({user:this._id},{user:this._id,hash:password},{upsert:true});
 })
 
 //AUTHORIZE USER

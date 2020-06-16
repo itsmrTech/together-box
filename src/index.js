@@ -3,8 +3,12 @@
  * 
  * 
  */
+import socketio from "socket.io"
 import vars from "./globals";
-import voip from "./app/voip/server"
+import https from "https"
+import socketController from "./app/socket"
+// import voip from "./app/voip/server"
+import fs from "fs"
 import './config/env';
 import didYouMean from "didyoumean"
 didYouMean.returnWinningObject = true;
@@ -58,12 +62,17 @@ app.use(function (req, res, next) {
 
 
 const port = process.env.API_PORT || 3000;
+let privateKey  = fs.readFileSync('security/cert.key', 'utf8');
+let certificate = fs.readFileSync('security/cert.pem', 'utf8');
 
-
-app.listen(port, (err) => {
+let credentials = {key: privateKey, cert: certificate};
+let httpsServer = https.createServer(credentials, app);
+global.io=socketio(httpsServer)
+httpsServer.listen(port,(err)=>{
   if (err) {
     console.error(err)
   }
 
   console.info(`listening on port`, Number(port))
 });
+socketController()

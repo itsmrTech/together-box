@@ -11,18 +11,18 @@ import ErrorHandler from '../middlewares/ErrorHandler';
 /*          POST /api/users/register            */
 export let register = async (req, res, next) => {
     //REQUEST VALIDATION
-    if (!req.validate(["username", "password"])) return;
+    if (!req.validate(["email", "password"])) return;
 
     var {
-        username,
+        email,
         password
     } = req.body;
     try {
         //CHECK IF USER ALREADY EXISTS
-        if (await User.findOne({ email })) throw { message: "email already exists.",code:409 };
+        if (await User.findOne({ email })) throw { message: "email already exists.", code: 409 };
         //CREATING NEW USER OBJECT
         var newUser = new User({
-            username,
+            email,
             password
         });
         //SAVING USER
@@ -44,17 +44,18 @@ export let register = async (req, res, next) => {
 /*          POST /api/users/login            */
 export let login = async (req, res, next) => {
     //REQUEST VALIDATION    
-    if (!req.validate(["username", "password"])) return;
+    if (!req.validate(["email", "password"])) return;
 
     var {
-        username,
+        email,
         password
     } = req.body;
     try {
         //FINDING USER
         var user = await User.findOne({
-            username
-        });
+            email
+        }).lean();
+        if (!user) throw { code: 401, message: "Email or password is incorrect." }
         //AUTHENTICATING USER
         var authenticated = await User.authorize({
             _id: user._id,
@@ -62,13 +63,14 @@ export let login = async (req, res, next) => {
         });
 
         //GENERATING TOKEN
-        if (authenticated)
-            var token = await tokenize(user._id);
+        if (!authenticated) throw { code: 401, message: "Email or password is incorrect." }
+        var token = await tokenize(user._id);
 
         //OK RESPONSE
         res.validSend(200, {
             authenticated,
-            token
+            token,
+            user
         })
     } catch (e) {
         return ErrorHandler(e, req.originalUrl, res)

@@ -29,6 +29,10 @@
     "nodeify": "^1.0.1",
     "path": "^0.12.7",
     "request-promise-native": "^1.0.7",
+    "shortid": "^2.2.15",
+    "simple-peer": "^9.7.2",
+    "socket.io": "^2.3.0",
+    "uniqid": "^5.2.0",
     "validator": "^9.2.0",
     "ws": "^7.3.0"
   },
