@@ -6,12 +6,13 @@
 import User from '../models/User';
 import tokenize from '../middlewares/Token'
 import ErrorHandler from '../middlewares/ErrorHandler';
+import Device from '../models/Device';
 
 
 /*          POST /api/users/register            */
 export let register = async (req, res, next) => {
     //REQUEST VALIDATION
-    if (!req.validate(["email", "password"])) return;
+    req.validate(["email", "password"]);
 
     var {
         email,
@@ -44,7 +45,7 @@ export let register = async (req, res, next) => {
 /*          POST /api/users/login            */
 export let login = async (req, res, next) => {
     //REQUEST VALIDATION    
-    if (!req.validate(["email", "password"])) return;
+    req.validate(["email", "password"]);
 
     var {
         email,
@@ -65,12 +66,14 @@ export let login = async (req, res, next) => {
         //GENERATING TOKEN
         if (!authenticated) throw { code: 401, message: "Email or password is incorrect." }
         var token = await tokenize(user._id);
-
+        let devices=await Device.find({user:user._id}).lean()
+        
         //OK RESPONSE
         res.validSend(200, {
             authenticated,
             token,
-            user
+            user,
+            devices,
         })
     } catch (e) {
         return ErrorHandler(e, req.originalUrl, res)

@@ -6,11 +6,12 @@
 import isValid from './isValid';
 export default (req, res, next) => {
 	validators(req, res);
-
+	req.outside = true
+	res.outside = true
 	next();
 }
 export let pushApis = (parent, routes) => {
-	parent=process.env.API_PREFIX+parent
+	parent = process.env.API_PREFIX + parent
 	routes.stack.forEach(function (r) {
 		if (r.route && r.route.path) {
 			globals.apis.push({ method: String(r.route.stack[0].method).toUpperCase(), path: parent + r.route.path })

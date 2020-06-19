@@ -60,34 +60,31 @@ let deepOmit = (object, keys) => {
  * @param forbiddenKeys {string[]} Keys that are not allowed to be in req.body
  *
  */
-export function req(requiredKeys, forbiddenKeys) {
-  var req = this;
-  var { res } = req;
-  var { body } = req;
-  if (!requiredKeys) requiredKeys = [];
-  if (!forbiddenKeys) forbiddenKeys = [];
+export function req(requiredKeys = [], forbiddenKeys = [], options = { platform: "body" }) {
+	var req = this;
+	var { res } = req;
+	var json = req[options.platform]
+  
+  
+	var missedKeys = findKeys(json, requiredKeys).notFoundKeys;
+	var notAllowedKeys = findKeys(json, forbiddenKeys).foundKeys;
+  
+	var error = "";
+	if (missedKeys.length > 0)
+	  error =
+		"The following keys are required in request " + options.platform + ":\n " +
+		_.join(missedKeys, " , ") +
+		"\n";
+	if (forbiddenKeys.length > 0)
+	  error =
+		"The following keys are forbidden in request " + options.platform + ":\n" +
+		_.join(forbiddenKeys, " , ") +
+		"\n";
+  
+	if (error == "") return true;
+	throw {message:error,code:400,kind:"missing"};
 
-  var missedKeys = findKeys(body, requiredKeys).notFoundKeys;
-  var notAllowedKeys = findKeys(body, forbiddenKeys).foundKeys;
-
-  var error = "";
-  if (missedKeys.length > 0)
-    error =
-      "The following keys are required in request body:\n " +
-      _.join(missedKeys, " , ") +
-      "\n";
-  if (forbiddenKeys.length > 0)
-    error =
-      "The following keys are forbidden in request body:\n" +
-      _.join(forbiddenKeys, " , ") +
-      "\n";
-
-  if (error == "") return true;
-  res.validSend(400, {
-    error
-  });
-  return false;
-}
+  }
 /**
  *
  * @param {number} status http status code
@@ -106,7 +103,12 @@ export function res(status, body, omitKeys) {
     }
   if (status == 200) console.ok("RESPONSE > ", 200, " : ", body);
   else console.error("RESPONSE > ", status, " : ", "sent");
-  return this.status(status).json(body);
+  if (this.outside)
+    return this.status(status).json(body);
+  else {
+    if (status == 200) return { statusCode: 200, ...body }
+    else return { statusCode: status, ...body }
+  }
 }
 
 export default {

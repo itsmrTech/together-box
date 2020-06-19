@@ -13,7 +13,7 @@ import Slideshow from '../models/Slideshow';
 /*          POST /api/users/register            */
 export let create = async (req, res, next) => {
     //REQUEST VALIDATION
-    if (!req.validate(["username", "password"])) return;
+    req.validate(["username", "password"]);
 
     var {
         username,
@@ -65,7 +65,7 @@ export let details = async (req, res) => {
     }
 }
 export let addPhoto = async (req, res) => {
-    if (!req.validate(["url", "slideshowid"])) return;
+    req.validate(["url", "slideshowid"]);
 
     var {
         url, slideshowid
@@ -90,7 +90,7 @@ export let addPhoto = async (req, res) => {
 /*          POST /api/users/login            */
 export let login = async (req, res, next) => {
     //REQUEST VALIDATION    
-    if (!req.validate(["username", "password"])) return;
+    req.validate(["username", "password"]);
 
     var {
         username,
