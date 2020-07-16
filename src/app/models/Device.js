@@ -9,7 +9,12 @@ var schema = mongoose.Schema({
 	users: [{
 		user: {type: mongoose.SchemaTypes.ObjectId, ref: "User"},
 		permissions:{}
-	}]
+	}],
+	unique_name:{type:String,unique:true,required:true},
+	timezone:String,
+	country:String,
+	language:String,
+	calendar:{type:String,enum:["jalali","grogerian"]},
 });
 
 schema.plugin(mongooseTimestamp);

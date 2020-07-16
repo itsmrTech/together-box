@@ -120,3 +120,4 @@ cert.pem
 .dev.env
 build/*
 yarn.lock
+public/uploads/*

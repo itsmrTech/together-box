@@ -1,4 +1,8 @@
 import AuthCode from "../app/models/AuthCode";
+import { uniqueNamesGenerator, adjectives, colors, starWars,names } from 'unique-names-generator';
+import Device from "../app/models/Device";
+import shortid from "shortid";
+
 
 export const pairing=async(exclude=[])=>{
     let code=String(globals.rand(1000,9999))
@@ -13,5 +17,17 @@ export const pairing=async(exclude=[])=>{
     }
     return code;
 }
+export const genDUN=async()=>{
+    
+    let dun=String(uniqueNamesGenerator({
+        dictionaries:[adjectives,colors,starWars,names],
+        separator:"-"
+    }))
+    dun=dun.replace(" ","-")
+    let found=await Device.countDocuments({unique_name:dun})
+    if(found>1)dun=dun+"-"+shortid.generate();
 
-export default {pairing}
+
+    return dun;
+}
+export default {pairing,genDUN}

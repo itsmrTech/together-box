@@ -10,7 +10,7 @@ import devices from './devices';
 
 //USING ROUTES
 routes.use('/users', users);
-routes.use('/devices', slideshows);
+routes.use('/slideshows', slideshows);
 routes.use('/devices', devices);
 
 export default routes;

@@ -7,6 +7,7 @@ import socketio from "socket.io"
 import vars from "./globals";
 import https from "https"
 import socketController from "./app/socket"
+import cron from "./tools/cron"
 // import voip from "./app/voip/server"
 import fs from "fs"
 import './config/env';

@@ -8,6 +8,7 @@ import tokenize from '../middlewares/Token'
 import ErrorHandler from '../middlewares/ErrorHandler';
 import Device from '../models/Device';
 import Slideshow from '../models/Slideshow';
+import Socket from '../models/Socket';
 
 
 /*          POST /api/users/register            */
@@ -47,19 +48,57 @@ export let details = async (req, res) => {
     // if (!req.validate(["device_code"])) return;
 
     var {
-        device_code
+        device_unique_name
     } = req.query;
     try {
-        if (!device_code) throw { code: 400, message: "device_code is required." }
-        let device = await Device.findOne({ code: device_code }).lean()
+        // if (!device_unique_name) throw { code: 400, message: "device_unique_name is required." }
+        let device
+        if (!device_unique_name) {
+            let devices = await Device.find({ "users.user": req.user._id }).lean()
+            if (devices.length > 1) throw { code: 409, message: "User has more than one device." }
+            if (devices.length < 1) throw { code: 404, message: "No device was found." }
+            device = devices[0]
+        }
+        else device = await Device.findOne({ unique_name: device_unique_name, "users.user": req.user._id }).lean()
 
         if (!device) throw { code: 404, message: "Device was not found." }
         let slideshow = await Slideshow.findOne({ device: device._id }).lean()
-
         //OK RESPONSE
         res.validSend(200, {
-            slideshow
+            slideshow,
+            device
         });
+    } catch (e) {
+        return ErrorHandler(e, req.originalUrl, res)
+    }
+}
+export let uploadPhotosToSlideshow = async (req, res) => {
+    // req.validate(["username", "password"]);
+
+    var {
+        device_unique_name
+    } = req.body;
+    try {
+        let fileUrls = req.files.map(f => {
+            return `https://192.168.0.149:4020/uploads/${f.filename}`
+        })
+        let device = await Device.findOne({ unique_name: device_unique_name, "users.user": req.user._id }).lean()
+        if (!device) throw { code: 404, message: "Device was not found." }
+        let slideshow = await Slideshow.findOne({ device: device._id }).lean();
+        if (!slideshow) slideshow = await (new Slideshow({ photos: [], device: device._id, })).save()
+        console.log(slideshow,fileUrls)
+         await Slideshow.updateOne({ _id: slideshow._id }, { photos: [ ...fileUrls,...slideshow.photos] })
+        
+        slideshow.photos=[ ...fileUrls,...slideshow.photos]
+        let sockets=await Socket.find({device:device._id}).lean()
+        sockets.map(s=>{
+            io.to(s.socketid).emit("slideshow",{slideshow,device})
+        })
+        //OK RESPONSE
+        res.validSend(200, {
+            slideshow,
+            device
+        })
     } catch (e) {
         return ErrorHandler(e, req.originalUrl, res)
     }
@@ -76,7 +115,7 @@ export let addPhoto = async (req, res) => {
             { $push: { photos: url } }, { new: true }).lean()
         if (!slideshow) throw { code: 404, message: "Slideshow was not found." }
         let device = await Device.findOne({ _id: slideshow.device })
-        io.to(device.socketid).emit("slideshow",slideshow)
+        io.to(device.socketid).emit("slideshow", { device, slideshow })
 
 
         //OK RESPONSE

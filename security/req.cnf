@@ -8,12 +8,12 @@ ST = State
 L = Location
 O = Organization Name
 OU = Organizational Unit 
-CN = 192.168.0.171:4020
+CN = 192.168.0.149:4020
 [v3_req]
 keyUsage = critical, digitalSignature, keyAgreement
 extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
 [alt_names]
-DNS.1 = 192.168.0.171:4020
-DNS.2 = 192.168.0.171:4021
-DNS.3 = 192.168.0.171:4020
+DNS.1 = 192.168.0.149:4020
+DNS.2 = 192.168.0.149:4021
+DNS.3 = 192.168.0.149:4020
