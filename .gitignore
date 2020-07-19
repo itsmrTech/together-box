@@ -121,3 +121,4 @@ cert.pem
 build/*
 yarn.lock
 public/uploads/*
+files/*

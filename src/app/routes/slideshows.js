@@ -12,7 +12,7 @@ import { details, addPhoto, uploadPhotosToSlideshow } from "../controllers/Slide
 import multer from "multer";
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, './public/uploads')
+        cb(null, './files')
     },
     filename: (req, file, cb) => {
         if (file.mimetype.slice(0, 5) !== 'image' && file.mimetype.slice(0, 5) !== 'video')

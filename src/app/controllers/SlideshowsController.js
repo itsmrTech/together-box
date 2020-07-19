@@ -9,6 +9,8 @@ import ErrorHandler from '../middlewares/ErrorHandler';
 import Device from '../models/Device';
 import Slideshow from '../models/Slideshow';
 import Socket from '../models/Socket';
+import { upload } from '../../tools/storage';
+import File from "../models/File";
 
 
 /*          POST /api/users/register            */
@@ -72,6 +74,7 @@ export let details = async (req, res) => {
         return ErrorHandler(e, req.originalUrl, res)
     }
 }
+
 export let uploadPhotosToSlideshow = async (req, res) => {
     // req.validate(["username", "password"]);
 
@@ -79,20 +82,29 @@ export let uploadPhotosToSlideshow = async (req, res) => {
         device_unique_name
     } = req.body;
     try {
-        let fileUrls = req.files.map(f => {
-            return `https://192.168.0.149:4020/uploads/${f.filename}`
-        })
+        
         let device = await Device.findOne({ unique_name: device_unique_name, "users.user": req.user._id }).lean()
         if (!device) throw { code: 404, message: "Device was not found." }
+        let fileids=[]
+        for (var i = 0; i < req.files.length; i++) {
+            let f = req.files[i]
+            let fileObj= await (new File({
+                local_path: f.path,
+                uploader:req.user._id,
+                device:device._id,
+            })).save()
+            upload(f.path,fileObj._id,f.filename)
+            fileids.push(fileObj._id)
+        }
         let slideshow = await Slideshow.findOne({ device: device._id }).lean();
         if (!slideshow) slideshow = await (new Slideshow({ photos: [], device: device._id, })).save()
-        console.log(slideshow,fileUrls)
-         await Slideshow.updateOne({ _id: slideshow._id }, { photos: [ ...fileUrls,...slideshow.photos] })
-        
-        slideshow.photos=[ ...fileUrls,...slideshow.photos]
-        let sockets=await Socket.find({device:device._id}).lean()
-        sockets.map(s=>{
-            io.to(s.socketid).emit("slideshow",{slideshow,device})
+        console.log(slideshow, fileids)
+        await Slideshow.updateOne({ _id: slideshow._id }, { photos: [...fileids, ...slideshow.photos] })
+
+        slideshow.photos = [...fileids, ...slideshow.photos]
+        let sockets = await Socket.find({ device: device._id }).lean()
+        sockets.map(s => {
+            io.to(s.socketid).emit("slideshow", { slideshow, device })
         })
         //OK RESPONSE
         res.validSend(200, {

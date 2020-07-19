@@ -12,10 +12,14 @@ import cron from "./tools/cron"
 import fs from "fs"
 import './config/env';
 import didYouMean from "didyoumean"
+import kue from "kue"
+import kui from "kue-ui"
+
 didYouMean.returnWinningObject = true;
 didYouMean.threshold = 0.5;
 
 import Project from './config/project';
+import storage from "./tools/storage";
 if (process.env.projectMode == "Production") {
   //Don't print logs in production mode
   console.config({
@@ -43,7 +47,15 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.use(ExpressPlugins);
-
+kui.setup({
+  apiURL: '/kapi', // IMPORTANT: specify the api url
+  baseURL: '/kue', // IMPORTANT: specify the base url
+  updateInterval: 5000 // Optional: Fetches new data every 5000 ms
+});
+// Mount kue JSON api
+app.use('/kapi', kue.app);
+// Mount UI
+app.use('/kue', kui.app);
 // Routes
 routes.post('/', (req, res) => res.json({
   message: Project.Name + ' API'
