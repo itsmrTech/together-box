@@ -11,6 +11,8 @@ import Slideshow from '../models/Slideshow';
 import Socket from '../models/Socket';
 import { upload } from '../../tools/storage';
 import File from "../models/File";
+import { encrypt, decrypt } from '../../tools/encryption';
+import FileKey from '../models/sensitive/FileKey';
 
 
 /*          POST /api/users/register            */
@@ -93,7 +95,12 @@ export let uploadPhotosToSlideshow = async (req, res) => {
                 uploader:req.user._id,
                 device:device._id,
             })).save()
-            upload(f.path,fileObj._id,f.filename)
+            let fileKey=await  (new FileKey({
+                file:fileObj._id,
+            })).save()
+            await encrypt(f.path,`${f.path}.encrypted`,fileKey.key)
+            await decrypt(`${f.path}.encrypted`,`${f.path}.decrypted`,fileKey.key)
+            upload(`${f.path}.encrypted`,fileObj._id,f.filename)
             fileids.push(fileObj._id)
         }
         let slideshow = await Slideshow.findOne({ device: device._id }).lean();

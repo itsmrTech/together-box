@@ -44,7 +44,8 @@ let _upload = async (local_path, fileid, upload_path) => {
         }
         console.log("local",local_path,fs.existsSync(local_path))
         await client.uploadFrom(local_path, "together/" + upload_path)
-        fs.unlink(local_path,()=>{})
+        if(fs.existsSync(local_path))fs.unlink(local_path,()=>{})
+        if(fs.existsSync(local_path.replace(".encrypted","")))fs.unlink(local_path.replace(".encrypted",""),()=>{})
         await File.updateOne({ _id: fileid }, {
             storage_path: "together/" + upload_path,
             access_url:"http://storage.itsmrtech.ir/together/"+upload_path,
@@ -56,7 +57,6 @@ let _upload = async (local_path, fileid, upload_path) => {
         // return await _upload(local_path,fileid, upload_path)
     }
 }
-console.log("fs",fs.readdirSync("files/test"))
 export const upload = async (local_path, fileid, upload_path) => {
     local_path=local_path.replace(/\\/g,"/")
     if (!upload_path) upload_path = local_path
