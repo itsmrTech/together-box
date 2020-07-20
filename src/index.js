@@ -14,6 +14,7 @@ import './config/env';
 import didYouMean from "didyoumean"
 import kue from "kue"
 import kui from "kue-ui"
+import cookieParser from "cookie-parser"
 
 didYouMean.returnWinningObject = true;
 didYouMean.threshold = 0.5;
@@ -45,6 +46,7 @@ const app = express();
 
 // Middlewares\
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(cors());
 app.use(ExpressPlugins);
 kui.setup({

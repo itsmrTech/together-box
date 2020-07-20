@@ -99,7 +99,6 @@ export let uploadPhotosToSlideshow = async (req, res) => {
                 file:fileObj._id,
             })).save()
             await encrypt(f.path,`${f.path}.encrypted`,fileKey.key)
-            await decrypt(`${f.path}.encrypted`,`${f.path}.decrypted`,fileKey.key)
             upload(`${f.path}.encrypted`,fileObj._id,f.filename)
             fileids.push(fileObj._id)
         }
