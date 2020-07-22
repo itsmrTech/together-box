@@ -35,10 +35,10 @@ const updateAllWeathers = async () => {
         console.error(e)
     }
 }
-setTimeout(() => {
+// setTimeout(() => {
 
-    updateAllWeathers()
-}, 1000)
-schedule.scheduleJob('* */2 * * *', async () => {
+//     updateAllWeathers()
+// }, 1000)
+schedule.scheduleJob('0 0 0/2 ? * * *', async () => {
     updateAllWeathers()
 });
