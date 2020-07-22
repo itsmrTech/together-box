@@ -22,7 +22,7 @@ export default async function auth(req, res, next) {
 	if (req.headers[TOKENKEY]) var api_token = req.headers[TOKENKEY];
 	//TOKENNOTFOUND Handling
 	if (!api_token) {
-		if(req,optionalAuth)return next();
+		if(req.optionalAuth)return next();
 		return res.validSend(401, "The following keys are required in request header: \n " + TOKENKEY + "\n")
 	}
 	//Verifying token
@@ -39,7 +39,7 @@ export default async function auth(req, res, next) {
 export const deviceAuth=async(req,res,next)=>{
 	if (req.headers[DEVICEKEY]) var device_code = req.headers[DEVICEKEY];
 	if(!device_code){
-		if(req,optionalAuth)return next();
+		if(req.optionalAuth)return next();
 		return res.validSend(401, "The following keys are required in request header: \n " + DEVICEKEY + "\n")
 	}
 	let device=await Device.findOne({code:device_code,status:"active"}).lean()
