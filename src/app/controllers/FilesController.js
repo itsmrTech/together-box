@@ -6,6 +6,8 @@ import fs from "fs"
 import { decrypt } from "../../tools/encryption";
 import { download } from "../../tools/storage";
 import shortid from "shortid";
+import Path from "path"
+import FileKey from "../models/sensitive/FileKey";
 export const getFile = async (req, res) => {
     req.validate(["file_code"], [], { platform: "params" })
 
@@ -31,16 +33,29 @@ export const getFile = async (req, res) => {
             if (String(req.device._id) != String(fileObj.device)) throw { code: 404, message: "File was not found", tag: 2 }
         }
         let file_path;
+<<<<<<< HEAD
         if (fileObj.status == "local") file_path = fileObj.local_path
         else if (fileObj.status == "uploaded") {
             let fileName=`_${Date.now()}_${shortid.generate()}`
             await download(fileObj.access_url,`/files/${fileName}`)
             await decrypt(`/files/${fileName}`,`/files/decrypted${fileName}`);
             file_path=`/files/decrypted${fileName}`
+=======
+        let fileName = `_${Date.now()}_${shortid.generate()}`
+        if (fileObj.status == "local") file_path = fileObj.local_path
+        else if (fileObj.status == "uploaded") {
+            let fileKey = await FileKey.findOne({ file: fileObj._id }).lean();
+            if (!fileKey) throw { code: 404, message: "File was not found.", tag: 5 }
+
+            await download(fileObj.access_url, `files/${fileName}`)
+            await decrypt(`files/${fileName}`, `files/decrypted${fileName}`,fileKey.key);
+            file_path = `files/decrypted${fileName}`
+>>>>>>> 7a208de1c2c6f16a4bffef1f19f4e5f0bc86e5a7
         }
-        res.sendFile(file_path)
-        if (fs.existsSync(`/files/${fileName}`)) fs.unlink(`/files/${fileName}`, () => { })
-        if (fs.existsSync(`/files/decrypted${fileName}`)) fs.unlink(`/files/decrypted${fileName}`, () => { })
+        res.sendFile(file_path, { root: __rootname, headers: { 'Content-Type': 'image/jpeg' } },()=>{
+            if (fs.existsSync(`files/${fileName}`)) fs.unlink(`files/${fileName}`, () => { })
+            if (fs.existsSync(`files/decrypted${fileName}`)) fs.unlink(`files/decrypted${fileName}`, () => { })
+        })
         return;
     }
     catch (e) {
