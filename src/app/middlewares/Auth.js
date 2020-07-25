@@ -20,6 +20,7 @@ export const optionalAuth = (req, res, next) => {
 export default async function auth(req, res, next) {
 	//Getting Token
 	if (req.headers[TOKENKEY]) var api_token = req.headers[TOKENKEY];
+	else if(req.cookies[TOKENKEY]) var api_token=req.cookies[TOKENKEY];
 	//TOKENNOTFOUND Handling
 	if (!api_token) {
 		if(req.optionalAuth)return next();
@@ -38,6 +39,7 @@ export default async function auth(req, res, next) {
 }
 export const deviceAuth=async(req,res,next)=>{
 	if (req.headers[DEVICEKEY]) var device_code = req.headers[DEVICEKEY];
+	else if (req.cookies[DEVICEKEY]) var device_code = req.cookies[DEVICEKEY];
 	if(!device_code){
 		if(req.optionalAuth)return next();
 		return res.validSend(401, "The following keys are required in request header: \n " + DEVICEKEY + "\n")

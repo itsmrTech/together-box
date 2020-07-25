@@ -3,10 +3,10 @@ import File from "../models/File"
 import ErrorHandler from "../middlewares/ErrorHandler";
 import Device from "../models/Device";
 export const getFile = async (req, res) => {
-    console.log(req.cookies)
     req.validate(["file_code"], [], { platform: "params" })
 
     try {
+
         if (!req.user && !req.device) throw { code: 401, message: "Unauthorized" }
         let { file_code } = req.params;
 
