@@ -1,6 +1,7 @@
 import kue from "kue"
 import File from "../app/models/File";
 import fs from "fs"
+import Axios from "axios"
 let queue = kue.createQueue({
     prefix: "together",
     redis: globals.redisConfig
@@ -64,5 +65,20 @@ export const upload = async (local_path, fileid, upload_path) => {
     local_path = local_path.replace(/\\/g, "/")
     if (!upload_path) upload_path = local_path
     queue.create("ftp", { type: "upload", local_path, upload_path, fileid }).save(() => { })
+}
+export const download=async(url,output_path)=>{
+    let writer=fs.createWriteStream(output_path);
+    const response=await Axios({
+        url,
+        method: 'GET',
+        responseType: 'stream'
+      })
+    
+      response.data.pipe(writer)
+    
+      return new Promise((resolve, reject) => {
+        writer.on('finish', resolve)
+        writer.on('error', reject)
+      })
 }
 export default { upload } 
