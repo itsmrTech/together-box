@@ -5,7 +5,7 @@
  */
 import socketio from "socket.io"
 import vars from "./globals";
-import https from "https"
+import http from "http"
 import socketController from "./app/socket"
 import cron from "./tools/cron"
 // import voip from "./app/voip/server"
@@ -62,7 +62,7 @@ app.use('/kue', kui.app);
 routes.post('/', (req, res) => res.json({
   message: Project.Name + ' API'
 }));
-app.use('/', routes);
+app.use('/api', routes);
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(function (req, res, next) {
@@ -77,13 +77,10 @@ app.use(function (req, res, next) {
 
 
 const port = process.env.API_PORT || 3000;
-let privateKey  = fs.readFileSync('security/cert.key', 'utf8');
-let certificate = fs.readFileSync('security/cert.pem', 'utf8');
 
-let credentials = {key: privateKey, cert: certificate};
-let httpsServer = https.createServer(credentials, app);
-global.io=socketio(httpsServer)
-httpsServer.listen(port,(err)=>{
+let httpServer = http.createServer(app);
+global.io=socketio(httpServer)
+httpServer.listen(port,(err)=>{
   if (err) {
     console.error(err)
   }

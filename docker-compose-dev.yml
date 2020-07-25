@@ -1,21 +1,40 @@
 version: '3'
 
 services:
-  together-box:
+  redis:
+    image: redis
+    container_name: storage_queue
+    # networks: 
+    #   - internal
+    expose: 
+      - 6379
+    networks:
+      - together_network
+  together-box-back:
     build: .
 
+    links: 
+      - redis
     ports:
       - "4020:4020"
       - "8443:8443"
     environment:
       - NODE_ENV=development
       - PROJECT_MODE=development
+      - REDIS_URL=redis
     labels:
-      - traefik.enable= true
-      - traefik.http.routers.together-box.rule=Host(`togetherbox.shamot.ir`)
-      - traefik.http.routers.together-box.rule=PathPrefix(`/dev/`)
-      - traefik.http.services.together-box.loadbalancer.server.port=4020
-    # networks:
-    #   - default
-      # - traefik-public
+      - "traefik.enable=true" # <== Enable traefik on itself to view dashboard and assign subdomain to view it
+      - "traefik.http.routers.together-box-back.rule=Host(`dev.together.shamot.ir`)" # <== Setting the domain for the dashboard
+      - "traefik.http.routers.together-box-back.rule=PathPrefix(`/api/`)"
+      - "traefik.http.routers.together-box-back.service=together-box-back-together-box@docker" # <== Enabling the api to be a service to access
+      - "traefik.http.routers.together-box-back.entrypoints=web-secured"
+      - "traefik.http.routers.together-box-back.tls.certresolver=letsencryptresolver"
+    networks:
+      - traefik_network
+      - together_network
+networks:
+  traefik_network:
+    external: true
+  together_network:
+    external: true
 

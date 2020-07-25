@@ -10,7 +10,7 @@ import { getFile } from "../controllers/FilesController";
 
 
 //ENDPOINTS
-routes.get('/:file_code',optionalAuth,Auth,deviceAuth, getFile);
+routes.get('/:file_code', getFile);
 
 
 pushApis("/files",routes)

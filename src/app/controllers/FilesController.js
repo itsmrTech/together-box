@@ -3,6 +3,7 @@ import File from "../models/File"
 import ErrorHandler from "../middlewares/ErrorHandler";
 import Device from "../models/Device";
 export const getFile = async (req, res) => {
+    console.log(req.cookies)
     req.validate(["file_code"], [], { platform: "params" })
 
     try {

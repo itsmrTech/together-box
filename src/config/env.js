@@ -8,7 +8,7 @@ import path from "path"
 let dotenvPath = "../../.dev.env"
 let projectMode = "Development"
 let port;
-let docker=false
+let docker = false
 console.log(process.argv)
 process
   .argv
@@ -19,8 +19,8 @@ process
         return dotenvPath = '../../.env';
         break;
       case "--docker":
-        docker=true
-      console.log("docker.env",process.env.PROJECT_MODE)
+        docker = true
+        console.log("docker.env", process.env.PROJECT_MODE)
         if (process.env.PROJECT_MODE == "production") {
           projectMode = "Production"
           return dotenvPath = '../../.env';
@@ -36,9 +36,16 @@ process
           port = Number(val.replace("port=", ""))
     }
   });
+let override = {}
+if (process.env.REDIS_URL) override.REDIS_URL = process.env.REDIS_URL
+if (process.env.REDIS_PORT) override.REDIS_PORT = process.env.REDIS_PORT
+
 dotenv.config({
   path: path.resolve(__dirname, dotenvPath),
 });
+_.mapKeys(override, (v, k) => {
+  process.env[k] = v
+})
 if (port) {
   process.env.API_PORT = port;
   process.env.SOCKET_PORT = port + 1;
@@ -46,6 +53,6 @@ if (port) {
 
 process.env.projectMode = projectMode;
 console.log(process.env.CASSANDRA_URL)
-if(!docker){
-  process.env.API_PREFIX=""
+if (!docker) {
+  process.env.API_PREFIX = ""
 }

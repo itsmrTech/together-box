@@ -1,7 +1,10 @@
 import kue from "kue"
 import File from "../app/models/File";
 import fs from "fs"
-let queue = kue.createQueue({ prefix: "together" })
+let queue = kue.createQueue({
+    prefix: "together",
+    redis: globals.redisConfig
+})
 const ftp = require("basic-ftp");
 (["ftp"]).map(a => {
     kue.Job.rangeByType(a, "active", 0, 1000000, 'asc', function (err, selectedJobs) {
@@ -31,7 +34,7 @@ queue.process("ftp", async (job, done) => {
 
     switch (job.data.type) {
         case "upload":
-            let { local_path, upload_path ,fileid} = job.data
+            let { local_path, upload_path, fileid } = job.data
             await _upload(local_path, fileid, upload_path)
         default:
     }
@@ -42,14 +45,14 @@ let _upload = async (local_path, fileid, upload_path) => {
         while (status != "connected") {
             await globals.sleep(2000)
         }
-        console.log("local",local_path,fs.existsSync(local_path))
+        console.log("local", local_path, fs.existsSync(local_path))
         await client.uploadFrom(local_path, "together/" + upload_path)
-        if(fs.existsSync(local_path))fs.unlink(local_path,()=>{})
-        if(fs.existsSync(local_path.replace(".encrypted","")))fs.unlink(local_path.replace(".encrypted",""),()=>{})
+        if (fs.existsSync(local_path)) fs.unlink(local_path, () => { })
+        if (fs.existsSync(local_path.replace(".encrypted", ""))) fs.unlink(local_path.replace(".encrypted", ""), () => { })
         await File.updateOne({ _id: fileid }, {
             storage_path: "together/" + upload_path,
-            access_url:"http://storage.itsmrtech.ir/together/"+upload_path,
-            status:"uploaded",
+            access_url: "http://storage.itsmrtech.ir/together/" + upload_path,
+            status: "uploaded",
         })
     } catch (e) {
         console.error(" FTP Error", e)
@@ -58,7 +61,7 @@ let _upload = async (local_path, fileid, upload_path) => {
     }
 }
 export const upload = async (local_path, fileid, upload_path) => {
-    local_path=local_path.replace(/\\/g,"/")
+    local_path = local_path.replace(/\\/g, "/")
     if (!upload_path) upload_path = local_path
     queue.create("ftp", { type: "upload", local_path, upload_path, fileid }).save(() => { })
 }
