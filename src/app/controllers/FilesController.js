@@ -31,8 +31,8 @@ export const getFile = async (req, res) => {
             if (String(req.device._id) != String(fileObj.device)) throw { code: 404, message: "File was not found", tag: 2 }
         }
         let file_path;
-        if (status == "local") file_path = fileObj.local_path
-        else if (status == "uploaded") {
+        if (fileObj.status == "local") file_path = fileObj.local_path
+        else if (fileObj.status == "uploaded") {
             let fileName=`_${Date.now()}_${shortid.generate()}`
             await download(fileObj.access_url,`/files/${fileName}`)
             await decrypt(`/files/${fileName}`,`/files/decrypted${fileName}`);
