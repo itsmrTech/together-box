@@ -15,7 +15,9 @@ import didYouMean from "didyoumean"
 import kue from "kue"
 import kui from "kue-ui"
 import cookieParser from "cookie-parser"
+import Path  from "path"
 
+global.__rootname = Path.resolve(__dirname,"../");
 didYouMean.returnWinningObject = true;
 didYouMean.threshold = 0.5;
 
