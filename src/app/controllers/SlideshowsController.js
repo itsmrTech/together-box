@@ -66,7 +66,11 @@ export let details = async (req, res) => {
         else device = await Device.findOne({ unique_name: device_unique_name, "users.user": req.user._id }).lean()
 
         if (!device) throw { code: 404, message: "Device was not found." }
-        let slideshow = await Slideshow.findOne({ device: device._id }).lean()
+        let slideshow = await Slideshow.findOne({ device: device._id }).populate("photos").lean();
+
+        slideshow.photos=slideshow.photos.map(photo=>{
+            return `${process.env.STORAGE_URL}/${photo.code}`
+        })
         //OK RESPONSE
         res.validSend(200, {
             slideshow,
