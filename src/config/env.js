@@ -32,8 +32,9 @@ process
         break;
       //Add more commands here
       default:
-        if (val.indexOf("port=") >= 0)
-          port = Number(val.replace("port=", ""))
+        if (val.indexOf)
+          if (val.indexOf("port=") >= 0)
+            port = Number(val.replace("port=", ""))
     }
   });
 let override = {}
