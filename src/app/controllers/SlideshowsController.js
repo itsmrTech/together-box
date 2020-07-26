@@ -92,6 +92,7 @@ export let uploadPhotosToSlideshow = async (req, res) => {
         let device = await Device.findOne({ unique_name: device_unique_name, "users.user": req.user._id }).lean()
         if (!device) throw { code: 404, message: "Device was not found." }
         let fileids=[]
+        let file_urls=[]
         for (var i = 0; i < req.files.length; i++) {
             let f = req.files[i]
             let fileObj= await (new File({
@@ -105,13 +106,16 @@ export let uploadPhotosToSlideshow = async (req, res) => {
             await encrypt(f.path,`${f.path}.encrypted`,fileKey.key)
             upload(`${f.path}.encrypted`,fileObj._id,f.filename)
             fileids.push(fileObj._id)
+            file_urls.push(`${process.env.STORAGE_URL}/${fileObj.code}`)
         }
-        let slideshow = await Slideshow.findOne({ device: device._id }).lean();
+        let slideshow = await Slideshow.findOne({ device: device._id }).populate("photos").lean();
         if (!slideshow) slideshow = await (new Slideshow({ photos: [], device: device._id, })).save()
         console.log(slideshow, fileids)
         await Slideshow.updateOne({ _id: slideshow._id }, { photos: [...fileids, ...slideshow.photos] })
 
-        slideshow.photos = [...fileids, ...slideshow.photos]
+        slideshow.photos = [...file_urls, ...slideshow.photos.map(photo=>`${process.env.STORAGE_URL}/${photo.code}`)]
+        
+        
         let sockets = await Socket.find({ device: device._id }).lean()
         sockets.map(s => {
             io.to(s.socketid).emit("slideshow", { slideshow, device })
@@ -147,42 +151,4 @@ export let addPhoto = async (req, res) => {
     } catch (e) {
         return ErrorHandler(e, req.originalUrl, res)
     }
-}
-/*          POST /api/users/login            */
-export let login = async (req, res, next) => {
-    //REQUEST VALIDATION    
-    req.validate(["username", "password"]);
-
-    var {
-        username,
-        password
-    } = req.body;
-    try {
-        //FINDING USER
-        var user = await User.findOne({
-            username
-        });
-        //AUTHENTICATING USER
-        var authenticated = await User.authorize({
-            _id: user._id,
-            password
-        });
-
-        //GENERATING TOKEN
-        if (authenticated)
-            var token = await tokenize(user._id);
-
-        //OK RESPONSE
-        res.validSend(200, {
-            authenticated,
-            token
-        })
-    } catch (e) {
-        return ErrorHandler(e, req.originalUrl, res)
-    }
-}
-/*          POST /api/users/me            */
-export let me = async (req, res) => {
-    //OK RESPONSE
-    res.validSend(200, req.user);
 }
