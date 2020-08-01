@@ -38,7 +38,7 @@ export const getFile = async (req, res) => {
         else if (fileObj.status == "uploaded") {
             let fileKey = await FileKey.findOne({ file: fileObj._id }).lean();
             if (!fileKey) throw { code: 404, message: "File was not found.", tag: 5 }
-
+            
             await download(fileObj.access_url, `files/${fileName}`)
             await decrypt(`files/${fileName}`, `files/decrypted${fileName}`,fileKey.key);
             file_path = `files/decrypted${fileName}`

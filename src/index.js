@@ -64,7 +64,7 @@ app.use('/kue', kui.app);
 routes.post('/', (req, res) => res.json({
   message: Project.Name + ' API'
 }));
-app.use('/api', routes);
+app.use('/', routes);
 app.use(express.static(path.join(__dirname, '../public')));
 
 app.use(function (req, res, next) {
