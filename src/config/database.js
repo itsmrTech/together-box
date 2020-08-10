@@ -17,7 +17,11 @@ const {
 const mongoOptions = {
 	useNewUrlParser: true,
 	useFindAndModify:false,
-	useCreateIndex:true
+	useCreateIndex:true,
+	server:{
+		reconnectTries:10,
+		reconnectInterval:3000
+	}
 };
 
 //GENERATING MONGODB URI
