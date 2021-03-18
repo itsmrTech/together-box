@@ -66,7 +66,7 @@ export let login = async (req, res, next) => {
         //GENERATING TOKEN
         if (!authenticated) throw { code: 401, message: "Email or password is incorrect." }
         var token = await tokenize(user._id);
-        let devices=await Device.find({user:user._id}).lean()
+        let devices=await Device.find({'users.user':user._id}).lean()
         
         //OK RESPONSE
         res.validSend(200, {

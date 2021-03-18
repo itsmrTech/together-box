@@ -5,14 +5,16 @@
  */
 const routes = express.Router();
 import {pushApis} from "../middlewares/ExpressPlugins"
-import Auth from '../middlewares/Auth';
+import Auth, { deviceAuth } from '../middlewares/Auth';
 
-import { genPairingCode, pairDevice, pairingCode, getDevice, setDeviceName } from "../controllers/DevicesController";
+import { genPairingCode, pairDevice, pairingCode, getDevice, setDeviceName,updateDevicePerformance } from "../controllers/DevicesController";
 
 //ENDPOINTS
 routes.get('/',Auth, getDevice);
 routes.get('/pair/code', pairingCode);
 routes.post('/pair',Auth, pairDevice);
+// routes.post('/stats',deviceAuth, pairDevice);
+routes.post('/stats', updateDevicePerformance);
 routes.put('/name',Auth, setDeviceName);
 
 

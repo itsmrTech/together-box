@@ -12,26 +12,33 @@ const {
 	DB_PORT,
 	DB_NAME,
 	DB_AUTHSOURCE,
+	DB_FULL_URL
 } = process.env;
 
 const mongoOptions = {
 	useNewUrlParser: true,
-	useFindAndModify:false,
-	useCreateIndex:true,
-	server:{
-		reconnectTries:10,
-		reconnectInterval:3000
+	useFindAndModify: false,
+	useCreateIndex: true,
+	server: {
+		reconnectTries: 10,
+		reconnectInterval: 3000
 	}
 };
 
 //GENERATING MONGODB URI
-var loginInfo = "";
-var authSource = "";
-if (DB_USERNAME) {
-	loginInfo = DB_USERNAME + ":" + DB_PASSWORD + "@";
-	authSource = "?authSource=" + DB_AUTHSOURCE;
+if (DB_FULL_URL) {
+	var uri = DB_FULL_URL
 }
-var uri = "mongodb://" + loginInfo + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + authSource;
+else {
+
+	var loginInfo = "";
+	var authSource = "";
+	if (DB_USERNAME) {
+		loginInfo = DB_USERNAME + ":" + DB_PASSWORD + "@";
+		authSource = "?authSource=" + DB_AUTHSOURCE;
+	}
+	var uri = "mongodb://" + loginInfo + DB_HOST + ":" + DB_PORT + "/" + DB_NAME + authSource;
+}
 
 //CONNECTING TO MONGODB SERVER
 mongoose.connect(uri, mongoOptions);

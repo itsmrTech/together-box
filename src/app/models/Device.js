@@ -15,6 +15,7 @@ var schema = mongoose.Schema({
 	country:String,
 	language:String,
 	calendar:{type:String,enum:["jalali","grogerian"]},
+	current_performance:Object,
 });
 
 schema.plugin(mongooseTimestamp);

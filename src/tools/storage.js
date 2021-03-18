@@ -48,13 +48,13 @@ let _upload = async (local_path, fileid, upload_path) => {
         }
         console.log("local", local_path, fs.existsSync(local_path))
         await client.uploadFrom(local_path, "together/" + upload_path)
-        if (fs.existsSync(local_path)) fs.unlink(local_path, () => { })
-        if (fs.existsSync(local_path.replace(".encrypted", ""))) fs.unlink(local_path.replace(".encrypted", ""), () => { })
         await File.updateOne({ _id: fileid }, {
             storage_path: "together/" + upload_path,
             access_url: "http://storage.itsmrtech.ir/together/" + upload_path,
             status: "uploaded",
         })
+        if (fs.existsSync(local_path)) fs.unlink(local_path, () => { })
+        if (fs.existsSync(local_path.replace(".encrypted", ""))) fs.unlink(local_path.replace(".encrypted", ""), () => { })
     } catch (e) {
         console.error(" FTP Error", e)
         await connect()

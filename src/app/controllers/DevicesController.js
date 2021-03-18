@@ -7,6 +7,7 @@ import User from '../models/User';
 import tokenize from '../middlewares/Token'
 import ErrorHandler from '../middlewares/ErrorHandler';
 import Device from '../models/Device';
+import Performance from '../models/Performance';
 import Slideshow from '../models/Slideshow';
 import AuthCode from '../models/AuthCode';
 import moment from 'moment';
@@ -70,6 +71,7 @@ export let setDeviceName = async (req, res) => {
             slideshow.photos = []
             await Slideshow.updateOne({ _id: slideshow._id }, { photos: [] })
         }
+        slideshow.photos=slideshow.photos.map(photo=>`${process.env.STORAGE_URL}/${photo.code}`)
         setTimeout(async () => {
 
             io.to(device.socketid).emit("slideshow", { device, slideshow })
@@ -103,4 +105,19 @@ export let pairDevice = async (req, res, next) => {
         return ErrorHandler(e, req.originalUrl, res)
     }
 
+}
+export let updateDevicePerformance=async(req,res)=>{
+    req.validate(["device_code"]);
+    let {device_code,performance}=req.body;
+    try {
+        let device=await Device.findOneAndUpdate({code:device_code},{current_performance:{date:Date.now(),...performance}}).lean()
+        if(!device)throw {code:404,message:"Device was not found."}
+        await (new Performance({
+            device:device._id,
+            ...performance
+        })).save()
+        return res.validSend(200,{message:"The device performance has been updated successfully."})
+    } catch (e) {
+        return ErrorHandler(e, req.originalUrl, res)
+    }
 }

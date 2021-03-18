@@ -40,6 +40,7 @@ export default async function auth(req, res, next) {
 export const deviceAuth=async(req,res,next)=>{
 	if (req.headers[DEVICEKEY]) var device_code = req.headers[DEVICEKEY];
 	else if (req.cookies[DEVICEKEY]) var device_code = req.cookies[DEVICEKEY];
+	else if (req.query[DEVICEKEY]) var device_code = req.query[DEVICEKEY];
 	if(!device_code){
 		if(req.optionalAuth)return next();
 		return res.validSend(401, "The following keys are required in request header: \n " + DEVICEKEY + "\n")
