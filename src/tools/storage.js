@@ -32,14 +32,17 @@ export const connect = async () => {
 }
 connect()
 queue.process("ftp", async (job, done) => {
-
-    switch (job.data.type) {
-        case "upload":
-            let { local_path, upload_path, fileid } = job.data
-            await _upload(local_path, fileid, upload_path)
-        default:
+    try {
+        switch (job.data.type) {
+            case "upload":
+                let { local_path, upload_path, fileid } = job.data
+                await _upload(local_path, fileid, upload_path)
+            default:
+        }
+        done()
+    } catch (e) {
+        done(e)
     }
-    done()
 })
 let _upload = async (local_path, fileid, upload_path) => {
     try {
@@ -58,6 +61,7 @@ let _upload = async (local_path, fileid, upload_path) => {
     } catch (e) {
         console.error(" FTP Error", e)
         await connect()
+        throw e;
         // return await _upload(local_path,fileid, upload_path)
     }
 }
@@ -66,19 +70,19 @@ export const upload = async (local_path, fileid, upload_path) => {
     if (!upload_path) upload_path = local_path
     queue.create("ftp", { type: "upload", local_path, upload_path, fileid }).save(() => { })
 }
-export const download=async(url,output_path)=>{
-    let writer=fs.createWriteStream(output_path);
-    const response=await Axios({
+export const download = async (url, output_path) => {
+    let writer = fs.createWriteStream(output_path);
+    const response = await Axios({
         url,
         method: 'GET',
         responseType: 'stream'
-      })
-    
-      response.data.pipe(writer)
-    
-      return new Promise((resolve, reject) => {
+    })
+
+    response.data.pipe(writer)
+
+    return new Promise((resolve, reject) => {
         writer.on('finish', resolve)
         writer.on('error', reject)
-      })
+    })
 }
-export default { upload } 
+export default { upload }

@@ -29,6 +29,8 @@ services:
       - "traefik.http.routers.together-box-back.service=together-box-back-together-box@docker" # <== Enabling the api to be a service to access
       - "traefik.http.routers.together-box-back.entrypoints=web-secured"
       - "traefik.http.routers.together-box-back.tls.certresolver=letsencryptresolver"
+    volumes:
+      - ./files:/usr/src/app/files
     networks:
       - traefik_network
       - together_network
